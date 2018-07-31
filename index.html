@@ -5,7 +5,13 @@
 	<style type="text/css">
 		.mortgage-calc-container{
 			display: flex;
-			justify-content: center;
+		    justify-content: center;
+		    max-width: 850px;
+		    border: solid 2px #888;
+		    border-radius: 3px;
+		    box-shadow: 3px 4px 25px -4px black;
+		    background-color: white;
+		    padding: 20px 10px;
 		}
 
 		.mortgage-calc-left{
@@ -37,6 +43,20 @@
 		    padding-left: 20px;
 		    color: #555;
 		    font-size: 16px;
+		}
+
+		.mortgage-calc-input-box input.wrong-value{
+			border-color: #e0482a;
+			color:  #e0482a;
+		}
+
+		.mortgage-calc-input-box input:focus,
+		.mortgage-calc-input-box select:focus{
+			outline:none;
+		}
+
+		.mortgage-calc-input-box select{
+			width: 100%;
 		}
 
 		.mortgage-calc-input-box span.left{
@@ -92,6 +112,17 @@
 		.mortgage-calc-price{
 			margin-top: 20px;
 		}
+
+		.error-message-container{
+			background: #e0482a;
+		    padding: 10px;
+		    color: white;
+		    font-size: 20px;
+		    font-weight: 600;
+		    display: none;
+		    border-radius: 3px;
+		    margin-top: 5px;
+		}
 		
 	</style>
 
@@ -106,6 +137,7 @@
 					<div class="mortgage-calc-input-box">
 						<input type="text" name="" class="home-value">	
 						<span class="left">$</span>
+						<div class="home-value-error error-message-container"></div>
 					</div>
 				</div>
 
@@ -121,16 +153,17 @@
 							<span class="right">%</span>
 						</div>
 					</div>
+					<div class="down-payment-error error-message-container"></div>
 				</div>
 
 				<div class="mortgage-calc-input-item-group">
 					<label>TYPE OF MORTGAGE</label>
 					<div class="mortgage-calc-input-box">
 						<select class="type-of-mortgage">
-							<option>15-year Fixed</option>	
-							<option>30-year Fixed</option>	
-							<option>5/1 ARM</option>	
-							<option>7/1 ARM</option>	
+							<option value="180">15-year Fixed</option>	
+							<option value="360">30-year Fixed</option>	
+							<option value="5arm">5/1 ARM</option>	
+							<option value="7arm">7/1 ARM</option>	
 						</select>
 					</div>
 				</div>
@@ -141,6 +174,7 @@
 						<input type="text" name="" class="interest-rate">	
 						<span class="right">%</span>
 					</div>
+					<div class="interest-rate-error error-message-container"></div>
 				</div>
 
 			</div>
@@ -149,7 +183,7 @@
 				<div class="mortgage-calc-ympe">Your monthly payment estimate:</div>
 				<div class="mortgage-calc-price">
 					<span class="price-usd">$</span>
-					<span class="price-amount">2436</span>
+					<span class="price-amount"></span>
 				</div>
 				<div class="mortgage-calc-note">NOTE: THIS CLCULATION DOES NOT INCLUDE PROPERTY TAXES AND/OR HOAS</div>
 			</div>
@@ -164,10 +198,193 @@
 				this.home_value_input = $("#" + this.container_id + " .home-value");
 				this.down_payment_usd_input = $("#" + this.container_id + " .down-payment-usd");
 				this.down_payment_percent_input = $("#" + this.container_id + " .down-payment-percent");
-				this.type_of_mortgage_input = $("#" + this.container_id + " .type-of-mortgage");
+				this.type_of_mortgage_select = $("#" + this.container_id + " .type-of-mortgage");
 				this.interest_rate_input = $("#" + this.container_id + " .interest-rate");
-				console.log(this.interest_rate_input);
+				this.YMPE_div = $("#" + this.container_id + " .price-amount");
+				this.home_value_error = $("#" +  this.container_id + " .home-value-error");
+				this.down_payment_error = $("#" + this.container_id + " .down-payment-error");
+				this.interest_rate_error = $("#" + this.container_id + " .interest-rate-error");
+				this.cur_focus = 0; // 0: home value, 1: downpayment usd, 2: downpayment %, 3: interest rate
+				
+				this.home_value = 200000;
+				this.down_payment_usd = 40000;
+				this.down_payment_percent = 20;
+				this.type_of_mortgage = 15 * 12;
+				this.interest_rate = 3.66;
+				this.ympe = 2436;
+				this.isARM = false;
+				this.armamount = 0;
+
+				
+				this.registerInputsEvent();
+				this.setValues();
+				
 			}
+
+			setValues()
+			{
+				var me = this;
+				
+				if(me.home_value >= 1000000000 && me.cur_focus == 0){
+					me.home_value_input.addClass("wrong-value");
+					me.home_value_error.html("Home Value is too large.");
+					me.home_value_error.show();
+					return;
+				}
+				if(me.home_value < me.down_payment_usd && me.cur_focus == 0){
+					me.home_value_input.addClass("wrong-value");
+					me.home_value_error.html("Home Value must be high than Down Payment.");
+					me.home_value_error.show();
+					return;
+				}
+				
+				me.home_value_input.removeClass("wrong-value");
+				me.home_value_error.hide();
+
+				if(me.down_payment_usd > me.home_value && me.cur_focus == 1){
+					me.down_payment_usd_input.addClass("wrong-value");
+					me.down_payment_error.html("Down Payment is too large.");
+					me.down_payment_error.show();
+					return;
+				}
+
+				me.down_payment_usd_input.removeClass("wrong-value");
+				me.down_payment_error.hide();
+
+				if(me.down_payment_percent > 100 && me.cur_focus == 2){
+					me.down_payment_percent_input.addClass("wrong-value");
+					me.down_payment_error.html("Down Payment % is too large.");
+					me.down_payment_error.show();
+					return;
+				}
+
+				me.down_payment_percent_input.removeClass("wrong-value");
+				me.down_payment_error.hide();
+
+				if(me.interest_rate <= 0 && me.cur_focus == 3){
+					me.interest_rate_input.addClass("wrong-value");
+					me.interest_rate_error.html("Interest Rate is too small");
+					me.interest_rate_error.show();
+					return;
+				}
+
+
+				if(me.interest_rate > 100 && me.cur_focus == 3){
+					me.interest_rate_input.addClass("wrong-value");
+					me.interest_rate_error.html("Interest Rate is too large");
+					me.interest_rate_error.show();
+					return;
+				}
+
+				me.interest_rate_input.removeClass("wrong-value");
+				me.interest_rate_error.hide();
+
+				if(me.interest_rate > 100){
+					me.interest_rate_input.addClass("wrong-value");
+					return;
+				}else {
+					me.interest_rate_input.removeClass("wrong-value");
+				}
+				me.home_value_input.val(me.home_value);
+				me.down_payment_usd_input.val(me.down_payment_usd);
+				me.down_payment_percent_input.val(me.down_payment_percent);
+				me.interest_rate_input.val(me.interest_rate);
+				me.PMT();
+
+			}
+
+			registerInputsEvent()
+			{
+				var me = this;
+
+				me.home_value_input.keyup(function(){
+					me.home_value = Math.round(parseFloat($(this).val()));
+					me.down_payment_percent = Math.round( me.down_payment_usd / me.home_value * 100);
+					me.cur_focus = 0;
+					me.setValues();
+					
+				});
+
+				me.down_payment_usd_input.keyup(function(){
+					me.down_payment_usd =parseFloat($(this).val());
+					me.down_payment_percent = me.down_payment_usd / me.home_value  * 100;
+					me.cur_focus = 1;
+					me.setValues();
+					
+				});
+
+				me.down_payment_percent_input.keyup(function(){
+					me.down_payment_percent = Math.round( parseFloat($(this).val()));
+					me.down_payment_usd = me.home_value * me.down_payment_percent / 100;
+					me.cur_focus = 2;
+					me.setValues();
+					
+				});
+
+				me.interest_rate_input.keyup(function(){
+					me.interest_rate = parseFloat($(this).val());
+					if($(this).val() == ""){
+						me.interest_rate = 0;
+					}
+					me.cur_focus = 3;
+					me.setValues();
+					
+				});
+
+				me.type_of_mortgage_select.change(function(){
+					var type_of_mortgage = $(this).val();
+					if(type_of_mortgage == "5arm"){
+						me.isARM = true;
+						me.type_of_mortgage = 360;
+						me.armamount = 5 * 12;
+						me.interest_rate = 4.12;
+					}else if(type_of_mortgage == "7arm"){
+						me.isARM = true;
+						me.type_of_mortgage = 360;
+						me.armamount = 7 * 12;	
+					} else{
+						me.isARM = false;
+						me.type_of_mortgage = parseInt(type_of_mortgage);
+						me.armamount = 0;
+						if(type_of_mortgage == "180"){
+							me.interest_rate = 3.66;
+						}else if(type_of_mortgage == "360"){
+							me.interest_rate = 4.33;
+						}
+					}
+
+					me.setValues();
+					
+				})
+
+			}
+
+
+			PMT()
+			{
+				var me = this;
+				var r = me.interest_rate / 12 / 100;
+				var N = me.type_of_mortgage;
+				var P = me.home_value - me.down_payment_usd;
+			
+				if(r == 0){
+					me.ympe = Math.round(P / N);
+				} else {
+					me.ympe =Math.round(r * P / (1 - Math.pow(1 + r, -N)));
+				}
+				me.YMPE_div.html(me.ympe);
+
+
+				if(me.isARM){
+					var nthP = Math.pow(1+r, me.armamount) * P - (Math.pow(1+r, me.armamount) - 1) * me.ympe / r;
+					var nthN = N - me.armamount;
+					me.ympe = Math.round(r * nthP / (1 - Math.pow(1 + r, -nthN)));
+					me.YMPE_div.html(me.ympe);
+				}
+				
+			}
+
+
 		}
 
 		var mortgage_calc = new MortgageCalc();
