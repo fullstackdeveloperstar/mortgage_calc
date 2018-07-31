@@ -308,6 +308,9 @@
 					home_value = parseFloat(home_value);
 					me.home_value = Math.round(home_value);
 					me.down_payment_percent = Math.round( me.down_payment_usd / me.home_value * 100);
+					if($(this).val() == ""){
+						me.home_value = 0;
+					}
 					me.cur_focus = 0;
 					me.setValues();
 					
@@ -318,7 +321,11 @@
 					down_payment_usd = down_payment_usd.replace(/,/g, "");
 					down_payment_usd = parseFloat(down_payment_usd);
 					me.down_payment_usd = Math.round(down_payment_usd);
-					me.down_payment_percent = me.down_payment_usd / me.home_value  * 100;
+					me.down_payment_percent = Math.round(me.down_payment_usd / me.home_value  * 100);
+					if($(this).val() == ""){
+						me.down_payment_usd = 0;
+						me.down_payment_percent = 0;
+					}
 					me.cur_focus = 1;
 					me.setValues();
 					
@@ -327,6 +334,9 @@
 				me.down_payment_percent_input.keyup(function(){
 					me.down_payment_percent = Math.round( parseFloat($(this).val()));
 					me.down_payment_usd = me.home_value * me.down_payment_percent / 100;
+					if($(this).val() == ""){
+						me.down_payment_percent = 0;
+					}
 					me.cur_focus = 2;
 					me.setValues();
 					
