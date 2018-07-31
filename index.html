@@ -12,6 +12,7 @@
 		    box-shadow: 3px 4px 25px -4px black;
 		    background-color: white;
 		    padding: 20px 10px;
+		    font-family: Helvetica, Arial, Sans-Serif;
 		}
 
 		.mortgage-calc-left{
@@ -98,10 +99,13 @@
 
 		.price-usd{
 			font-size: 30px;
+			color: #777;
+			padding-top: 7px;
 		}
 
 		.price-amount{
-			font-size: 40px;
+			font-size: 50px;
+    		font-weight: 700;
 		}
 
 		.mortgage-calc-note{
@@ -111,6 +115,7 @@
 
 		.mortgage-calc-price{
 			margin-top: 20px;
+			display: flex;
 		}
 
 		.error-message-container{
@@ -285,8 +290,8 @@
 				}else {
 					me.interest_rate_input.removeClass("wrong-value");
 				}
-				me.home_value_input.val(me.home_value);
-				me.down_payment_usd_input.val(me.down_payment_usd);
+				me.home_value_input.val(me.commafy(me.home_value.toString()));
+				me.down_payment_usd_input.val(me.commafy(me.down_payment_usd.toString()));
 				me.down_payment_percent_input.val(me.down_payment_percent);
 				me.interest_rate_input.val(me.interest_rate);
 				me.PMT();
@@ -298,7 +303,10 @@
 				var me = this;
 
 				me.home_value_input.keyup(function(){
-					me.home_value = Math.round(parseFloat($(this).val()));
+					var home_value = $(this).val();
+					home_value = home_value.replace(/,/g, "");
+					home_value = parseFloat(home_value);
+					me.home_value = Math.round(home_value);
 					me.down_payment_percent = Math.round( me.down_payment_usd / me.home_value * 100);
 					me.cur_focus = 0;
 					me.setValues();
@@ -306,7 +314,10 @@
 				});
 
 				me.down_payment_usd_input.keyup(function(){
-					me.down_payment_usd =parseFloat($(this).val());
+					var down_payment_usd = $(this).val();
+					down_payment_usd = down_payment_usd.replace(/,/g, "");
+					down_payment_usd = parseFloat(down_payment_usd);
+					me.down_payment_usd = Math.round(down_payment_usd);
 					me.down_payment_percent = me.down_payment_usd / me.home_value  * 100;
 					me.cur_focus = 1;
 					me.setValues();
@@ -372,19 +383,30 @@
 				} else {
 					me.ympe =Math.round(r * P / (1 - Math.pow(1 + r, -N)));
 				}
-				me.YMPE_div.html(me.ympe);
+				
 
 
 				if(me.isARM){
 					var nthP = Math.pow(1+r, me.armamount) * P - (Math.pow(1+r, me.armamount) - 1) * me.ympe / r;
 					var nthN = N - me.armamount;
 					me.ympe = Math.round(r * nthP / (1 - Math.pow(1 + r, -nthN)));
-					me.YMPE_div.html(me.ympe);
 				}
+
+				// me.YMPE_div.html(me.ympe);
+				me.YMPE_div.html(me.commafy(me.ympe.toString()));
 				
 			}
 
-
+			commafy( num ) {
+			    var str = num.toString().split('.');
+			    if (str[0].length >= 4) {
+			        str[0] = str[0].replace(/(\d)(?=(\d{3})+$)/g, '$1,');
+			    }
+			    if (str[1] && str[1].length >= 5) {
+			        str[1] = str[1].replace(/(\d{3})/g, '$1 ');
+			    }
+			    return str.join('.');
+			}
 		}
 
 		var mortgage_calc = new MortgageCalc();
