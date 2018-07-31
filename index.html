@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Mortgage Title</title>
+	<style type="text/css">
+		.mortgage-calc-container{
+			display: flex;
+			justify-content: center;
+		}
+
+		.mortgage-calc-left{
+			max-width: 300px;
+		}
+
+		.mortgage-calc-input-item-group{
+			display: flex;
+			flex-direction: column;
+			margin-bottom: 10px;
+		}
+
+		.mortgage-calc-input-item-group label{
+			font-size: 15px;
+    		color: #555;
+		}
+
+		.mortgage-calc-input-box{
+			margin-top: 5px;
+			position: relative;
+		}
+
+		.mortgage-calc-input-box input,
+		.mortgage-calc-input-box select{
+			height: 30px;
+			width: calc(100% - 25px);
+		    border: solid 2px #888;
+		    border-radius: 3px;
+		    padding-left: 20px;
+		    color: #555;
+		    font-size: 16px;
+		}
+
+		.mortgage-calc-input-box span.left{
+			position: absolute;
+		    left: 0px;
+		    height: 30px;
+		    padding: 5px;
+		    font-size: 20px;
+		    padding-bottom: 0;
+		    color: #555;
+		    top: 0;
+		}
+
+		.mortgage-calc-input-box span.right{
+			position: absolute;
+		    right: 0px;
+		    height: 30px;
+		    padding: 5px;
+		    font-size: 20px;
+		    padding-bottom: 0;
+		    color: #555;
+		    top: 0;
+		}
+
+		.mortgage-calc-multi-items{
+			display: flex;
+		}
+		    
+		.mortgage-calc-right{
+			max-width: 500px;
+    		margin-left: 50px;
+		}
+
+		.mortgage-calc-ympe{
+			margin-top: 20px;
+			font-size: 25px;
+    		font-weight: 700;
+		}
+
+		.price-usd{
+			font-size: 30px;
+		}
+
+		.price-amount{
+			font-size: 40px;
+		}
+
+		.mortgage-calc-note{
+			font-size: 12px;
+    		margin-top: 20px;
+		}
+
+		.mortgage-calc-price{
+			margin-top: 20px;
+		}
+		
+	</style>
+
+	<script type="text/javascript" src="jquery-1.11.1.js"></script>
+</head>
+<body>
+	<div id="mortgage-calc">
+		<div class="mortgage-calc-container">
+			<div class="mortgage-calc-left">
+				<div class="mortgage-calc-input-item-group">
+					<label>HOME VALUE</label>
+					<div class="mortgage-calc-input-box">
+						<input type="text" name="" class="home-value">	
+						<span class="left">$</span>
+					</div>
+				</div>
+
+				<div class="mortgage-calc-input-item-group">
+					<label>DOWN PAYMENT</label>
+					<div class="mortgage-calc-multi-items">
+						<div class="mortgage-calc-input-box">
+							<input type="text" name="" class="down-payment-usd">	
+							<span class="left">$</span>
+						</div>
+						<div class="mortgage-calc-input-box">
+							<input type="text" name="" class="down-payment-percent">	
+							<span class="right">%</span>
+						</div>
+					</div>
+				</div>
+
+				<div class="mortgage-calc-input-item-group">
+					<label>TYPE OF MORTGAGE</label>
+					<div class="mortgage-calc-input-box">
+						<select class="type-of-mortgage">
+							<option>15-year Fixed</option>	
+							<option>30-year Fixed</option>	
+							<option>5/1 ARM</option>	
+							<option>7/1 ARM</option>	
+						</select>
+					</div>
+				</div>
+
+				<div class="mortgage-calc-input-item-group">
+					<label>INTEREST RATE</label>
+					<div class="mortgage-calc-input-box">
+						<input type="text" name="" class="interest-rate">	
+						<span class="right">%</span>
+					</div>
+				</div>
+
+			</div>
+
+			<div class="mortgage-calc-right">
+				<div class="mortgage-calc-ympe">Your monthly payment estimate:</div>
+				<div class="mortgage-calc-price">
+					<span class="price-usd">$</span>
+					<span class="price-amount">2436</span>
+				</div>
+				<div class="mortgage-calc-note">NOTE: THIS CLCULATION DOES NOT INCLUDE PROPERTY TAXES AND/OR HOAS</div>
+			</div>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		class MortgageCalc{
+			
+			init(){				
+				this.container = $("#" + this.container_id);
+				this.home_value_input = $("#" + this.container_id + " .home-value");
+				this.down_payment_usd_input = $("#" + this.container_id + " .down-payment-usd");
+				this.down_payment_percent_input = $("#" + this.container_id + " .down-payment-percent");
+				this.type_of_mortgage_input = $("#" + this.container_id + " .type-of-mortgage");
+				this.interest_rate_input = $("#" + this.container_id + " .interest-rate");
+				console.log(this.interest_rate_input);
+			}
+		}
+
+		var mortgage_calc = new MortgageCalc();
+		mortgage_calc.container_id = "mortgage-calc";
+		mortgage_calc.init();
+	</script>
+</body>
+</html>
